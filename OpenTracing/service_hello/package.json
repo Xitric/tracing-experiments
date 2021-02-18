@@ -4,7 +4,7 @@
   "description": "A backend service for testing Jaeger",
   "main": "app.js",
   "scripts": {
-    "start": "node -r ./tracing.js app.js"
+    "start": "node app.js"
   },
   "keywords": [
     "jaeger"

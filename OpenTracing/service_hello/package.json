@@ -1,0 +1,17 @@
+{
+  "name": "service",
+  "version": "1.0.0",
+  "description": "A backend service for testing Jaeger",
+  "main": "app.js",
+  "scripts": {
+    "start": "node -r ./tracing.js app.js"
+  },
+  "keywords": [
+    "jaeger"
+  ],
+  "author": "Xitric",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

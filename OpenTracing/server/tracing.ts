@@ -60,6 +60,11 @@ function requestTracer(parent: Span, tracer: Tracer): Plugin {
     const headers = {};
     tracer.inject(span.context(), FORMAT_HTTP_HEADERS, headers)
 
+    span.log({
+      event: 'Some request headers',
+      headers
+    });
+
     req.set(headers);
     req.on('error', (err: Error) => {
       if (err) {

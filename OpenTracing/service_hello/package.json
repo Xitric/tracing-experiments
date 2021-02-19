@@ -12,6 +12,7 @@
   "author": "Xitric",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "jaeger-client": "^3.18.1"
   }
 }

@@ -3,11 +3,22 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var {initTracer} = require('./tracing');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var tracer = initTracer('server');
+
+app.use(function (req, res, next) {
+  const span = tracer.startSpan(`${req.method} ${req.url}`);
+  req.span = span;
+  res.on('finish', () => {
+    span.finish();
+  });
+  next();
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

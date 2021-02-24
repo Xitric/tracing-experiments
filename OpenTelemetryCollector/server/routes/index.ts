@@ -5,8 +5,8 @@ var router = Router();
 /* GET home page. */
 router.get('/', async function(req, res, next) {
   try {
-    const msg = await http.get('http://service_hello:3000/');
-    const info = await http.get('http://service_info:3000/');
+    const msg = await http.get('http://hello-service/');
+    const info = await http.get('http://info-service/');
     res.render('index', { title: 'Express', message: msg.text, info: info.text });
   } catch (err) {
     console.error(err);

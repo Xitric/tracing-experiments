@@ -20,8 +20,10 @@ kubectl create -n observability -f https://raw.githubusercontent.com/jaegertraci
 As well as running the custom operator found locally:
 
 ```
-kubectl create -n observability -f jaeger/operator.yml
+kubectl create -f jaeger/operator.yml
 ```
+
+All resources of `Kind: Jaeger` should now be added to the namespace `templateapp`.
 
 ## Deploying the template app
 The template application is a microservice app with a front-end server and two backend services. They can be deployed by running:

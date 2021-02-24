@@ -21,6 +21,12 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 3000
+      - name: agent
+        image: jaegertracing/jaeger-opentelemetry-agent:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
 ---
 apiVersion: v1
 kind: Service

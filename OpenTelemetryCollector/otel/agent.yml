@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-agent-config
+  namespace: templateapp
+  labels:
+    app: otel
+    component: otel-agent-config
+data:
+  otel-agent-config: |
+    receivers:
+      # The client library speaks in the otlp format
+      otlp:
+        protocols:
+          grpc:
+          http:
+    exporters:
+      jaeger:
+        # The endpoint of the Jaeger collector in the cluster
+        # Accessed through an internal Service
+        endpoint: "simplest-collector:14250"
+        insecure: true
+      logging:
+        loglevel: debug
+        sampling_initial: 1
+        sampling_thereafter: 1
+    processors:
+      batch:
+      memory_limiter:
+        # Same as --mem-ballast-size-mib CLI argument in DaemonSet
+        ballast_size_mib: 165
+        # 80% of maximum memory up to 2G
+        limit_mib: 400
+        # 25% of limit up to 2G
+        spike_limit_mib: 100
+        check_interval: 5s
+    extensions:
+      health_check: {}
+      zpages: {}
+    service:
+      extensions: [health_check, zpages]
+      pipelines:
+        traces:
+          # Receives traces from otlp (instrumentation inside applications)
+          # Then sends the trace data to Jaeger
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [jaeger, logging]
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-agent
+  namespace: templateapp
+  labels:
+    app: otel
+    component: otel-agent
+spec:
+  selector:
+    matchLabels:
+      app: otel
+      component: otel-agent
+  template:
+    metadata:
+      labels:
+        app: otel
+        component: otel-agent
+    spec:
+      containers:
+      - name: otel-agent
+        image: otel/opentelemetry-collector:latest
+        command:
+          - "/otelcol"
+          - "--config=/conf/otel-agent-config.yaml"
+          # Memory Ballast size should be max 1/3 to 1/2 of memory.
+          - "--mem-ballast-size-mib=165"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 55679 # ZPages endpoint.
+        - containerPort: 55681 # Default OpenTelemetry receiver port.
+        - containerPort: 8888  # Metrics.
+        # Here, we specify that the container should mount a volume that exists
+        # on the pod itself. This is configured further below
+        volumeMounts:
+        - name: otel-agent-config-vol
+          mountPath: /conf
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+      # This is where we specify the pod volumes that our containers can mount.
+      # The volume is constructed based on the contents of the ConfigMap above.
+      volumes:
+        - configMap:
+            # This is the name of the ConfigMap
+            name: otel-agent-config
+            items:
+              # Here, we state that the key with name 'otel-agent-config' should
+              # be transformed into a yaml file with the value as its contents.
+              - key: otel-agent-config
+                path: otel-agent-config.yaml
+          # The name of the volume itself, to be mounted inside containers
+          name: otel-agent-config-vol
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-agent-service
+  namespace: templateapp
+spec:
+  selector:
+    app: otel
+    component: otel-agent
+  ports:
+  - protocol: TCP
+    port: 55681
+    targetPort: 55681

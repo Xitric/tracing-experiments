@@ -4,9 +4,19 @@ metadata:
   name: jaeger-config
 spec:
   strategy: production
+  # The Jaeger collector
   collector:
     maxReplicas: 3
     resources:
       limits:
         cpu: 500m
         memory: 256Mi
+    # config:
+    #   extensions:
+    #     health_check:
+    #       port: 14269
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: https://search-jaeger-storage-qbnmindxxf45ncdbeclylzasfa.eu-central-1.es.amazonaws.com

@@ -5,7 +5,7 @@
 - rbac
 - storage
 
-If they are not enabled, the can be toggled with:
+If they are not enabled, they can be toggled with (assuming microk8s):
 
 ```
 sudo microk8s.enable dns rbac storage
@@ -49,6 +49,28 @@ Then run the following command to configure an Elasticsearch cluster with a sing
 ```
 kubectl apply -f elastic/config.yml
 ```
+
+If the cluster does not have sufficient resources to run Elasticsearch locally, you can povision a free instance at AWS.
+
+## Deploying Jaeger tracing
+Now, we can use the Jaeger Operator to provision Jaeger inside our cluster. The configuration for the entire Jaeger deployment can be applied with:
+
+```
+kubectl apply -f jaeger/config.yml
+```
+
+For a vendor agnostic solution, a DaemonSet is used to deploy a separate Core OTEL collector on each node in the cluster. Applications can be instrumented to forward trace data to this agent on their host node. The OTEL collector then transforms the data into a format understood by Jaeger, and forwards it to the Jaeger collector. The Core OTEL DaemonSet can be applied with:
+
+```
+kubectl apply -f otel/agent.yml
+```
+
+
+
+
+
+
+For a vendor agnostic solution, the application will be instrumented with the Core OTEL collector, which is configured to forward trace data to the load-balanced Jaeger collector in the cluster. The Jaeger backend could thus easily be swapped out with another solution.
 
 ## Deploying the template app
 The template application is a microservice app with a front-end server and two backend services. Each service is dpeloyed with a Jaeger OTEL agent as sidecar. As such, OpenTelemetry instrumentation can forward traces to `localhost:55680`. They can be deployed by running:

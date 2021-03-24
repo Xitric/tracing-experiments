@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: server
+  name: serverjs
   namespace: templateapp
 spec:
   selector:
     matchLabels:
-      app: server
+      app: serverjs
   template:
     metadata:
       labels:
-        app: server
+        app: serverjs
     spec:
       containers:
-      - name: server
-        image: xitric/trace-server:latest
+      - name: serverjs
+        image: xitric/trace-serverjs:latest
         resources:
           limits:
             memory: "128Mi"
@@ -32,11 +32,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: server-service
+  name: serverjs-service
   namespace: templateapp
 spec:
   selector:
-    app: server
+    app: serverjs
   type: LoadBalancer
   ports:
   - port: 3000

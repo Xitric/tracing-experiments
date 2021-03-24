@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@opentelemetry/core": "^0.17.0",
+    "@opentelemetry/exporter-collector": "^0.17.0",
     "@opentelemetry/exporter-jaeger": "^0.17.0",
     "@opentelemetry/instrumentation": "^0.17.0",
     "@opentelemetry/node": "^0.17.0",
